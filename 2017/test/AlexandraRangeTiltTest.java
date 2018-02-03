@@ -44,9 +44,7 @@ public class AlexandraRangeTiltTest extends Robot {
         //rangeSensor = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range");
         //rangeSensorCriteria = new RangeSensorCriteria(rangeSensor, 15);
 
-       tiltSensorCriteria = new AlexandraTiltCriteria(imu, 45);
-
-
+        tiltSensorCriteria = new AlexandraTiltCriteria(imu, 45);
 
         frontLeft = hardwareMap.dcMotor.get("frontLeft");
         frontRight = hardwareMap.dcMotor.get("frontRight");
@@ -124,6 +122,3 @@ class AlexandraTiltCriteria implements SensorCriteria {
         }
     }
 }
-
-
-
