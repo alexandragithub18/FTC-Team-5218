@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) September 2017 FTC Teams 25/5218
  *
@@ -30,58 +31,49 @@
  *  TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  *  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package test;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.hardware.rev.RevColorSensorV3;
+import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.RobotLog;
 
-import opmodes.calibration.HisaishiCalibration;
-import team25core.GamepadTask;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 import team25core.Robot;
 import team25core.RobotEvent;
+import team25core.RobotTask;
 
-@TeleOp(name = "Wheel Intake Test")
-@Disabled
-public class WheelIntakeTest extends Robot {
+public class SkystoneDetectionTask extends RobotTask
+{
+    public enum EventKind {
+        STONE_DETECTED,
+    }
 
-    private DcMotor leftIntake;
-    private DcMotor rightIntake;
-
-    @Override
-    public void handleEvent(RobotEvent e)
+    public class SkystoneDetectionEvent extends RobotEvent
     {
-        if (e instanceof GamepadTask.GamepadEvent) {
-            GamepadTask.GamepadEvent event = (GamepadTask.GamepadEvent) e;
+        public EventKind kind;
 
-            switch (event.kind) {
-                case BUTTON_X_DOWN:
-                    leftIntake.setPower(HisaishiCalibration.INTAKE_LEFT_COLLECT);
-                    rightIntake.setPower(HisaishiCalibration.INTAKE_RIGHT_COLLECT);
-                    break;
-                case BUTTON_B_DOWN:
-                    leftIntake.setPower(HisaishiCalibration.INTAKE_LEFT_DISPENSE);
-                    rightIntake.setPower(HisaishiCalibration.INTAKE_RIGHT_DISPENSE);
-                    break;
-                case BUTTON_X_UP:
-                case BUTTON_B_UP:
-                    leftIntake.setPower(0.0);
-                    rightIntake.setPower(0.0);
-                    break;
-            }
+        public SkystoneDetectionEvent(RobotTask task, EventKind kind)
+        {
+            super(task);
+            this.kind = kind;
         }
     }
 
-    @Override
-    public void init()
+    protected ColorSensor colorSensor;
+    protected DistanceSensor distanceSensor;
+    protected int count;
+    protected final static int THRESHOLD = 100;
+    protected ElapsedTime delayTimer;
 
+    public SkystoneDetectionTask(Robot robot, ColorSensor colorSensor, DistanceSensor distanceSensor)
     {
-        //make sure "LeftIntake" etc. aligns with configurations in phone or align "LeftIntake" w/phone
-        leftIntake = hardwareMap.get(DcMotor.class, "leftIntake");
-        rightIntake = hardwareMap.get(DcMotor.class, "rightIntake");
-
-        GamepadTask gamepad= new GamepadTask(this, GamepadTask.GamepadNumber.GAMEPAD_1);
-        addTask(gamepad);
+        super(robot);
+        this.colorSensor = colorSensor;
+        this.distanceSensor = distanceSensor;
     }
 
     @Override
@@ -89,4 +81,32 @@ public class WheelIntakeTest extends Robot {
     {
     }
 
+    @Override
+    public void stop()
+    {
+        robot.removeTask(this);
+    }
+
+    @Override
+    public boolean timeslice()
+    {
+        SkystoneDetectionEvent event;
+
+        /*
+         * Don't attempt detection if the sensor is not within 5cm of an object.
+         */
+        if (distanceSensor.getDistance(DistanceUnit.CM) > 5) {
+            return false;
+        }
+
+        int blue = colorSensor.blue();
+        int red = colorSensor.red();
+
+        if (Math.abs(red - blue) < THRESHOLD) {
+            event = new SkystoneDetectionEvent(this, EventKind.STONE_DETECTED);
+            robot.queueEvent(event);
+            return true;
+        }
+        return false;
+    }
 }

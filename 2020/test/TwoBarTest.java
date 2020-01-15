@@ -32,16 +32,17 @@
  */
 package test;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import opmodes.HisaishiCalibration;
-import team25core.DeadmanMotorTask;
+import opmodes.calibration.HisaishiCalibration;
 import team25core.GamepadTask;
 import team25core.Robot;
 import team25core.RobotEvent;
 
 @TeleOp(name = "Two Bar Test")
+@Disabled
 public class TwoBarTest extends Robot {
 
     private DcMotor twoBar;

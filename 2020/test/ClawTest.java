@@ -33,17 +33,18 @@
 
 package test;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import opmodes.HisaishiCalibration;
+import opmodes.calibration.HisaishiCalibration;
 import team25core.GamepadTask;
 import team25core.Robot;
 import team25core.RobotEvent;
 
 @TeleOp(name = "Claw Test")
-//@Disabled
+@Disabled
 public class ClawTest extends Robot {
     private Servo claw;
     private DcMotor lift;
